@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>My Sleep</title>
+<meta name="description" content="Did you sleep enough last night? One answer, one picture of the night.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232a78d6'/%3E%3Cpath d='M21 20.5A8 8 0 0 1 13.5 9a8 8 0 1 0 7.5 11.5Z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f6f5f1; --surface: #fcfcfb; --sunk: #edece7;
+  --ink: #0b0b0b; --ink2: #52514e; --mute: #6b6964;
+  --grid: #e6e5df; --base: #c3c2b7; --ring: rgba(11,11,11,.08);
+  --blue: #2a78d6; --blue-soft: #9ec5f4; --blue-wash: rgba(42,120,214,.10);
+  --snore: #eb6834; --phone: #8f8d86;
+  --good: #006300; --note: #f6efe1; --note-ink: #5c4210;
+  --g1: #000; --g2: #666;
+  --ease: cubic-bezier(.32,.72,0,1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #000000; --surface: #181818; --sunk: #272727;
+    --ink: #ffffff; --ink2: #c3c2b7; --mute: #9b9992;
+    --grid: #272727; --base: #3d3d3a; --ring: rgba(255,255,255,.08);
+    --blue: #3987e5; --blue-soft: #2f5584; --blue-wash: rgba(57,135,229,.16);
+    --snore: #d95926; --phone: #8f8d86;
+    --good: #2fbf4f; --note: #272727; --note-ink: #ecd9b0;
+    --g1: #fff; --g2: #9b9b9b;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #000000; --surface: #181818; --sunk: #272727;
+  --ink: #ffffff; --ink2: #c3c2b7; --mute: #9b9992;
+  --grid: #272727; --base: #3d3d3a; --ring: rgba(255,255,255,.08);
+  --blue: #3987e5; --blue-soft: #2f5584; --blue-wash: rgba(57,135,229,.16);
+  --snore: #d95926; --phone: #8f8d86;
+  --good: #2fbf4f; --note: #272727; --note-ink: #ecd9b0;
+  --g1: #fff; --g2: #9b9b9b;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 400 16px/24px Manrope, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+.wrap { max-width: 640px; margin: 0 auto; padding: 16px 16px 64px; }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 16px; top: 16px; background: var(--surface); padding: 8px 12px; border-radius: 8px; z-index: 9; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+h1, h2, h3, p { margin: 0; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 32px; }
+.brand { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 24px; font-weight: 700; }
+.brand svg { width: 24px; height: 24px; }
+.stamp { font-size: 12px; line-height: 16px; color: var(--mute); text-align: right; }
+
+/* hero: the one answer */
+.when { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.when h1 { font-size: 18px; line-height: 28px; font-weight: 700; }
+.when p { font-size: 14px; line-height: 20px; color: var(--mute); }
+.steps { display: flex; gap: 8px; }
+.iconbtn { width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 9999px; background: var(--surface); box-shadow: 0 0 0 1px var(--ring); cursor: pointer; transition: background-color .5s var(--ease), transform .5s var(--ease); }
+.iconbtn:hover:not(:disabled) { background: var(--sunk); }
+.iconbtn:active:not(:disabled) { transform: scale(.94); }
+.iconbtn:disabled { opacity: .3; cursor: default; }
+.iconbtn svg { width: 20px; height: 20px; }
+.answer { padding: 24px 0 40px; }
+.big { font-size: 72px; line-height: 1; font-weight: 700; letter-spacing: -.04em; background: linear-gradient(90deg, var(--g1), var(--g2)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.big span { font-size: 36px; letter-spacing: -.02em; margin-right: 8px; }
+.big span:last-child { margin-right: 0; }
+.verdict { margin-top: 12px; font-size: 20px; line-height: 28px; font-weight: 600; text-wrap: balance; }
+.verdict .sub { display: block; font-weight: 500; color: var(--ink2); }
+.verdict .ok { color: var(--good); }
+.meter { margin-top: 24px; }
+.track { position: relative; height: 12px; border-radius: 9999px; background: var(--sunk); }
+.fill { position: absolute; inset: 0 auto 0 0; border-radius: 9999px; background: var(--blue); transition: width 1s var(--ease); }
+.goal { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--ink); }
+.goal-lab { position: relative; height: 16px; margin-top: 8px; font-size: 12px; line-height: 16px; font-weight: 600; }
+.goal-lab span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.foot { margin-top: 16px; font-size: 14px; line-height: 20px; color: var(--mute); text-wrap: pretty; }
+
+/* cards */
+.card { background: var(--surface); border-radius: 24px; box-shadow: 0 0 0 1px var(--ring); padding: 24px 16px; margin-bottom: 16px; }
+@media (min-width: 560px) { .card { padding: 32px 24px; } }
+.card h2 { font-size: 20px; line-height: 28px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.card .hint { margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--ink2); text-wrap: pretty; }
+
+/* the night picture */
+.ends { display: flex; justify-content: space-between; gap: 16px; margin-top: 24px; font-size: 14px; line-height: 20px; color: var(--mute); }
+.ends b { display: block; font-size: 18px; line-height: 28px; color: var(--ink); font-weight: 700; }
+.ends div:last-child { text-align: right; }
+.chart { position: relative; margin-top: 8px; touch-action: pan-y; }
+.chart svg { display: block; overflow: visible; }
+.chart text { font: 500 12px Manrope, system-ui, sans-serif; fill: var(--mute); }
+.chart text.lab { fill: var(--ink2); font-weight: 600; }
+.chart text.ink { fill: var(--ink); font-weight: 600; }
+.tip { position: absolute; top: 0; pointer-events: none; padding: 4px 8px; border-radius: 8px; background: var(--ink); color: var(--surface); font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap; transform: translateX(-50%); opacity: 0; transition: opacity .3s var(--ease); }
+.tip.on { opacity: 1; }
+.cross { position: absolute; top: 0; width: 1px; background: var(--ink); opacity: 0; pointer-events: none; transition: opacity .3s var(--ease); }
+.cross.on { opacity: .35; }
+.quiet { margin-top: 16px; font-size: 14px; line-height: 20px; color: var(--mute); text-wrap: pretty; }
+
+/* insights */
+.facts { list-style: none; margin: 16px 0 0; padding: 0; }
+.facts li { display: flex; gap: 12px; padding: 16px 0; box-shadow: inset 0 1px 0 var(--grid); font-size: 16px; line-height: 24px; text-wrap: pretty; }
+.facts li:first-child { box-shadow: none; padding-top: 8px; }
+.facts li:last-child { padding-bottom: 0; }
+.facts .ic { flex: none; width: 32px; height: 32px; border-radius: 9999px; display: grid; place-items: center; background: var(--sunk); color: var(--ink2); }
+.facts .ic svg { width: 16px; height: 16px; }
+.facts b { font-weight: 700; }
+
+/* over time */
+.headline { margin-top: 16px; font-size: 24px; line-height: 32px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.headline .m { color: var(--ink2); font-weight: 600; }
+.chart [data-i] { cursor: pointer; }
+.gap { height: 32px; }
+.hello { text-align: center; padding: 48px 16px; }
+.hello svg { width: 48px; height: 48px; color: var(--blue); }
+.hello h2 { margin-top: 16px; }
+.hello p { margin: 8px auto 0; max-width: 360px; }
+.btn { margin-top: 16px; border: 0; border-radius: 12px; padding: 8px 12px; background: var(--ink); color: var(--surface); font-size: 16px; line-height: 24px; font-weight: 600; cursor: pointer; transition: transform .5s var(--ease), opacity .5s var(--ease); }
+.btn:hover { opacity: .88; }
+.btn:active { transform: scale(.98); }
+
+.note { display: flex; gap: 12px; background: var(--note); color: var(--note-ink); border-radius: 16px; padding: 12px 16px; margin-top: 16px; font-size: 14px; line-height: 20px; }
+.note svg { flex: none; width: 20px; height: 20px; }
+.note details summary { cursor: pointer; font-weight: 600; margin-top: 4px; }
+.note code { display: block; margin-top: 4px; font: 12px/16px ui-monospace, monospace; word-break: break-word; }
+footer { margin-top: 32px; font-size: 12px; line-height: 16px; color: var(--mute); text-align: center; }
+
+.sk { background: var(--sunk); border-radius: 12px; animation: pulse 1.6s var(--ease) infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+.rise { animation: rise .9s var(--ease) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(16px); filter: blur(6px); } }
+@media (prefers-reduced-motion: reduce) { .rise, .sk { animation: none; } .fill { transition: none; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 256 256" aria-hidden="true"><path fill="var(--blue)" d="M233.54 142.23a8 8 0 0 0-8-2 88.08 88.08 0 0 1-109.8-109.8 8 8 0 0 0-10-10 104.84 104.84 0 0 0-52.91 37A104 104 0 0 0 136 224a103.09 103.09 0 0 0 62.52-20.88 104.84 104.84 0 0 0 37-52.91 8 8 0 0 0-1.98-7.98Z"/></svg>My sleep</div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+  <main id="main">
+    <div aria-hidden="true">
+      <div class="sk" style="height:28px;width:160px"></div>
+      <div class="sk" style="height:72px;width:240px;margin-top:24px"></div>
+      <div class="sk" style="height:28px;width:280px;margin-top:12px"></div>
+      <div class="sk" style="height:12px;margin-top:24px"></div>
+      <div class="sk" style="height:320px;margin-top:48px;border-radius:24px"></div>
+    </div>
+  </main>
+  <footer id="foot"></footer>
+</div>
+<script>
+const NEED = 420; // 7 hours, in minutes
+const TZ = 'Asia/Kolkata', IST = 330 * 60000, HOUR = 3600000;
+const $ = s => document.querySelector(s);
+const ic = {
+  prev: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M165.66 202.34a8 8 0 0 1-11.32 11.32l-80-80a8 8 0 0 1 0-11.32l80-80a8 8 0 0 1 11.32 11.32L91.31 128Z"/></svg>',
+  next: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="m181.66 133.66-80 80a8 8 0 0 1-11.32-11.32L164.69 128 90.34 53.66a8 8 0 0 1 11.32-11.32l80 80a8 8 0 0 1 0 11.32Z"/></svg>',
+  clock: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88Zm64-88a8 8 0 0 1-8 8h-56a8 8 0 0 1-8-8V72a8 8 0 0 1 16 0v48h48a8 8 0 0 1 8 8Z"/></svg>',
+  calm: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M222.16 177.25a8 8 0 0 1-1 11.25c-17.36 14.39-32.86 19.5-47 19.5-18.58 0-34.82-8.82-49.93-17-25.35-13.76-47.24-25.64-79.07.74a8 8 0 1 1-10.22-12.31c40.17-33.28 70.32-16.92 96.93-2.48 25.35 13.75 47.24 25.63 79.07-.74a8 8 0 0 1 11.22 1.04Zm-11.27-57c-31.83 26.38-53.72 14.5-79.07.74-26.61-14.43-56.76-30.79-96.93 2.49a8 8 0 0 0 10.22 12.31c31.83-26.38 53.72-14.5 79.07-.74C139.29 143.18 155.53 152 174.11 152c14.11 0 29.61-5.11 47-19.5a8 8 0 0 0-10.22-12.31Zm-176.89-41c40.17-33.28 70.32-16.92 96.93-2.48 25.35 13.75 47.24 25.63 79.07-.74a8 8 0 1 1 10.22 12.31C202.86 102.66 187.36 107.77 173.25 107.77c-18.58 0-34.82-8.82-49.93-17-25.35-13.76-47.24-25.64-79.07.74A8 8 0 1 1 34 79.25Z"/></svg>',
+  snore: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M56 96v64a8 8 0 0 1-16 0V96a8 8 0 0 1 16 0Zm32-72a8 8 0 0 0-8 8v192a8 8 0 0 0 16 0V32a8 8 0 0 0-8-8Zm40 32a8 8 0 0 0-8 8v128a8 8 0 0 0 16 0V64a8 8 0 0 0-8-8Zm40 32a8 8 0 0 0-8 8v64a8 8 0 0 0 16 0V96a8 8 0 0 0-8-8Zm40-16a8 8 0 0 0-8 8v96a8 8 0 0 0 16 0V80a8 8 0 0 0-8-8Z"/></svg>',
+  phone: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M176 16H80a24 24 0 0 0-24 24v176a24 24 0 0 0 24 24h96a24 24 0 0 0 24-24V40a24 24 0 0 0-24-24Zm8 200a8 8 0 0 1-8 8H80a8 8 0 0 1-8-8V40a8 8 0 0 1 8-8h96a8 8 0 0 1 8 8ZM140 60a12 12 0 1 1-12-12 12 12 0 0 1 12 12Z"/></svg>',
+  move: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M240 128a8 8 0 0 1-8 8h-40.58l-31.68 63.37a8 8 0 0 1-14.31 0L98.58 85.89 74.15 132.4A8 8 0 0 1 67.06 136H24a8 8 0 0 1 0-16h38.22l29.9-57.41a8 8 0 0 1 14.2.06L152 175.8l26.29-52.58A8 8 0 0 1 185.42 120H232a8 8 0 0 1 8 8Z"/></svg>',
+  info: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88Zm16-40a8 8 0 0 1-8 8 16 16 0 0 1-16-16v-40a8 8 0 0 1 0-16 16 16 0 0 1 16 16v40a8 8 0 0 1 8 8Zm-32-92a12 12 0 1 1 12 12 12 12 0 0 1-12-12Z"/></svg>',
+  moon: '<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M233.54 142.23a8 8 0 0 0-8-2 88.08 88.08 0 0 1-109.8-109.8 8 8 0 0 0-10-10 104.84 104.84 0 0 0-52.91 37A104 104 0 0 0 136 224a103.09 103.09 0 0 0 62.52-20.88 104.84 104.84 0 0 0 37-52.91 8 8 0 0 0-1.98-7.98Zm-44.64 48.11A88 88 0 0 1 65.66 67.11a89 89 0 0 1 31.4-26A106 106 0 0 0 96 56a104.11 104.11 0 0 0 104 104 106 106 0 0 0 14.92-1.06 89 89 0 0 1-26.02 31.4Z"/></svg>',
+};
+
+// ---------- small helpers ----------
+const ms = s => new Date(s).getTime();
+const clock = t => new Date(t).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: TZ });
+const hourLab = t => new Date(t).toLocaleTimeString('en-IN', { hour: 'numeric', hour12: true, timeZone: TZ });
+const day = (t, o) => new Date(t).toLocaleDateString('en-IN', { timeZone: TZ, ...o });
+const istDate = t => new Date(t + IST).toISOString().slice(0, 10);
+const dur = m => { m = Math.round(m); const h = Math.floor(m / 60), r = m % 60; return h ? (r ? `${h}h\u00a0${r}m` : `${h}h`) : `${r}\u00a0min`; };
+const durWords = m => { m = Math.round(m); const h = Math.floor(m / 60), r = m % 60; return [h && `${h} hour${h > 1 ? 's' : ''}`, r && `${r} minute${r > 1 ? 's' : ''}`].filter(Boolean).join(' ') || '0 minutes'; };
+const sinceSix = t => (((t + IST) % 86400000) / 60000 - 1080 + 1440) % 1440; // minutes after 6 pm
+const sixToClock = m => hourLab(Date.UTC(2026, 0, 1, 18) - IST + m * 60000).replace(':00', '');
+const median = a => { const s = [...a].sort((x, y) => x - y); return s.length ? (s[(s.length - 1) >> 1] + s[s.length >> 1]) / 2 : 0; };
+const q = (a, p) => { const s = [...a].sort((x, y) => x - y), k = (s.length - 1) * p, f = Math.floor(k); return s[f] + (s[Math.ceil(k)] - s[f]) * (k - f); };
+
+let data = null, idx = 0;
+
+// ---------- per-night maths ----------
+function study(n) {
+  const bed = ms(n.bed), up = ms(n.up), len = n.timeline.length;
+  const m = (n.motion5 || []).map(v => v == null ? null : Math.min(v, 1));
+  const vals = m.filter(v => v != null), med = median(vals);
+  // gently smoothed movement, so a single noisy 5 minutes doesn't break a calm stretch
+  const s = m.map((v, i) => { if (v == null) return null; const w = [m[i - 1], v, m[i + 1]].filter(x => x != null); return w.reduce((a, b) => a + b, 0) / w.length; });
+  let calm = null;
+  if (n.motion && vals.length >= 12) {
+    for (let i = 0; i < s.length; i++) {
+      if (s[i] == null || s[i] > med) continue;
+      let j = i, miss = 0;
+      while (j < s.length && s[j] != null && (s[j] <= med ? (miss = 0, true) : ++miss <= 1)) j++;
+      j -= miss;
+      if (!calm || j - i > calm[1] - calm[0]) calm = [i, j];
+      i = j;
+    }
+    if (calm && (calm[1] - calm[0]) * 5 < 45) calm = null;
+  }
+  let peak = null;
+  if (vals.length) m.forEach((v, i) => { if (v != null && i > 0 && i < m.length - 2 && n.timeline[i] !== 'phone' && v >= .35 && v >= 2.5 * med && (peak == null || v > m[peak])) peak = i; });
+  const snoreAt = (n.snore5 || []).map((v, i) => v > 0 ? i : -1).filter(i => i >= 0);
+  const phone = [];
+  n.timeline.forEach((st, i) => { if (st === 'phone') { const last = phone[phone.length - 1]; if (last && last[1] === i) last[1] = i + 1; else phone.push([i, i + 1]); } });
+  return { bed, up, len, m, med, calm, peak, snoreAt, phone, at: i => bed + i * 300000 };
+}
+
+// ---------- hero answer ----------
+function answer(n) {
+  const a = n.asleep_min, gap = NEED - a;
+  let word, sub;
+  if (gap <= 0) { word = '<span class="ok">Yes, you slept enough.</span>'; sub = gap < -5 ? `${dur(-gap)} more than your 7 hours.` : 'Right on your 7 hours.'; }
+  else if (gap <= 30) { word = 'Almost enough.'; sub = `Just ${dur(gap)} short of your 7 hours.`; }
+  else { word = 'Not enough sleep.'; sub = `${dur(gap)} short of the 7 hours you need.`; }
+  const h = Math.floor(a / 60), r = Math.round(a % 60), max = Math.max(540, a);
+  const big = h ? `${h}<span>h</span>${r ? `${r}<span>m</span>` : ''}` : `${r}<span>min</span>`;
+  return `<section class="answer rise" aria-label="Last night's answer">
+    <p class="big" aria-label="${durWords(a)} asleep">${big}</p>
+    <p class="verdict">${word}<span class="sub">${sub}</span></p>
+    <div class="meter" aria-hidden="true">
+      <div class="track"><div class="fill" style="width:${a / max * 100}%"></div><div class="goal" style="left:${NEED / max * 100}%"></div></div>
+      <div class="goal-lab"><span style="left:${NEED / max * 100}%">7 h goal</span></div>
+    </div>
+  </section>`;
+}
+
+// ---------- the night picture ----------
+function nightSVG(el, n, S) {
+  const W = el.clientWidth, x = i => i / S.len * W, sw = W / S.len;
+  const hasM = n.motion && S.m.some(v => v != null), hasA = n.audio_min > 0;
+  const LT = hasM || S.phone.length ? 44 : 16, WH = hasM ? 128 : 40, mid = LT + WH / 2, SL = hasA ? 32 : 0, AX = 24, H = LT + WH + SL + AX + 8;
+  const vmax = Math.max(.4, q(S.m.filter(v => v != null), .97) || 0), base = LT + WH;
+  const amp = v => 2 + (WH - 8) * Math.min(v / vmax, 1);
+  let g = '';
+  // hour gridlines + labels
+  const t0 = S.bed, t1 = S.bed + S.len * 300000, tx = t => (t - t0) / (t1 - t0) * W;
+  const hours = []; for (let t = Math.ceil((t0 + IST) / HOUR) * HOUR - IST; t < t1; t += HOUR) hours.push(t);
+  const every = Math.ceil(hours.length / Math.max(1, Math.floor(W / 52)));
+  hours.forEach((t, k) => {
+    g += `<line x1="${tx(t)}" x2="${tx(t)}" y1="${LT}" y2="${LT + WH + SL}" stroke="var(--grid)"/>`;
+    const X = tx(t);
+    if (k % every === 0 && X > 20 && X < W - 20) g += `<text x="${X}" y="${LT + WH + SL + 18}" text-anchor="middle">${hourLab(t)}</text>`;
+  });
+  // phone bands
+  S.phone.forEach(([a, b]) => { g += `<rect x="${x(a)}" y="${LT}" width="${Math.max(x(b) - x(a), 3)}" height="${WH}" rx="4" fill="var(--phone)" opacity=".28"/>`; });
+  // calm stretch wash
+  if (S.calm) g += `<rect x="${x(S.calm[0])}" y="${LT}" width="${x(S.calm[1]) - x(S.calm[0])}" height="${WH}" rx="8" fill="var(--blue-wash)"/>`;
+  if (hasM) {
+    // mirrored waveform, one path per recorded run
+    const runs = []; let cur = null;
+    S.m.forEach((v, i) => { if (v == null) { cur = null; return; } if (!cur) runs.push(cur = []); cur.push([x(i) + sw / 2, amp(v)]); });
+    const smooth = pts => { let d = `M${pts[0][0]},${pts[0][1]}`; for (let i = 1; i < pts.length; i++) { const p0 = pts[i - 2] || pts[i - 1], p1 = pts[i - 1], p2 = pts[i], p3 = pts[i + 1] || p2; d += `C${p1[0] + (p2[0] - p0[0]) / 6},${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6},${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]},${p2[1]}`; } return d; };
+    runs.forEach(r => {
+      if (r.length === 1) r = [[r[0][0] - sw / 2, r[0][1]], [r[0][0] + sw / 2, r[0][1]]];
+      const top = smooth(r.map(([X, a]) => [X, base - a]));
+      g += `<path d="${top}L${r[r.length - 1][0]},${base}L${r[0][0]},${base}Z" fill="var(--blue)" fill-opacity=".22"/><path d="${top}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    });
+    // gaps where the phone wasn't recording movement
+    let a = null;
+    S.m.concat([0]).forEach((v, i) => {
+      if (v == null && a == null) a = i;
+      if (v != null && a != null) {
+        g += `<line x1="${x(a) + 2}" x2="${x(i) - 2}" y1="${base - 2}" y2="${base - 2}" stroke="var(--base)" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 6"/>`;
+        if (x(i) - x(a) > 76) g += `<text x="${(x(a) + x(i)) / 2}" y="${base - 12}" text-anchor="middle">not recorded</text>`;
+        a = null;
+      }
+    });
+  } else {
+    // no movement data: a plain bar from bed to up, with phone breaks cut out
+    g += `<rect x="0" y="${mid - 6}" width="${W}" height="12" rx="6" fill="var(--blue-soft)"/>`;
+  }
+  // labels in the lane above the picture, placed so they never collide
+  const labels = [];
+  if (S.peak != null) labels.push({ x: x(S.peak) + sw / 2, text: 'you turned over', tip: base - amp(S.m[S.peak]), cls: 'ink' });
+  if (S.calm) labels.push({ x: (x(S.calm[0]) + x(S.calm[1])) / 2, text: 'calmest stretch', cls: 'lab', span: [x(S.calm[0]), x(S.calm[1])] });
+  S.phone.forEach(([p, q2]) => labels.push({ x: (x(p) + x(q2)) / 2, text: 'on phone', tip: LT, cls: 'lab' }));
+  const rows = [[], []];
+  labels.forEach(l => {
+    const w = l.text.length * 6.6 + 8; let X = Math.min(Math.max(l.x, w / 2), W - w / 2);
+    const r = rows.findIndex(row => row.every(o => X + w / 2 < o[0] || X - w / 2 > o[1]));
+    if (r < 0) return;
+    rows[r].push([X - w / 2, X + w / 2]);
+    const y = r ? 34 : 16;
+    g += `<text class="${l.cls}" x="${X}" y="${y - 4}" text-anchor="middle">${l.text}</text>`;
+    if (l.span) g += `<path d="M${l.span[0] + 4},${LT - 4}V${LT - 7}H${l.span[1] - 4}V${LT - 4}" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+    else if (l.tip != null) { g += `<line x1="${l.x}" x2="${l.x}" y1="${y + 2}" y2="${l.tip - 4}" stroke="var(--ink2)" stroke-width="1" />`; if (l.cls === 'ink') g += `<circle cx="${l.x}" cy="${l.tip}" r="4" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/>`; }
+  });
+  // snoring lane
+  if (hasA) {
+    const sy = LT + WH + 8, sh = SL - 12, smax = Math.max(...n.snore5, 1);
+    g += `<rect x="0" y="${sy + sh / 2 - .5}" width="${W}" height="1" fill="var(--grid)"/>`;
+    S.snoreAt.forEach(i => { const h = Math.max(4, sh * Math.sqrt(n.snore5[i] / smax)); g += `<rect x="${x(i) + .5}" y="${sy + (sh - h) / 2}" width="${Math.max(sw - 1, 2)}" height="${h}" rx="${Math.min(2, sw / 2)}" fill="var(--snore)"/>`; });
+    if (S.snoreAt.length) {
+      const a = x(S.snoreAt[0]), b = x(S.snoreAt[S.snoreAt.length - 1] + 1);
+      g += W - b > 64 ? `<text class="lab" x="${b + 8}" y="${sy + sh / 2 + 4}">snoring</text>` : `<text class="lab" x="${a - 8}" y="${sy + sh / 2 + 4}" text-anchor="end">snoring</text>`;
+    } else g += `<text x="${W / 2}" y="${sy + sh / 2 - 4}" text-anchor="middle">no snoring heard</text>`;
+  }
+  g += `<rect x="0" y="${LT}" width="${W}" height="${WH + SL}" fill="transparent" id="hit"/>`;
+  el.innerHTML = `<svg width="${W}" height="${H}" role="img" aria-label="Your night from ${clock(S.bed)} to ${clock(S.up)}">${g}</svg><div class="cross"></div><div class="tip"></div>`;
+  // scrub to read any moment
+  const tip = el.querySelector('.tip'), cross = el.querySelector('.cross');
+  cross.style.top = LT + 'px'; cross.style.height = WH + SL + 'px';
+  const show = e => {
+    const r = el.getBoundingClientRect(), X = Math.min(Math.max(e.clientX - r.left, 0), W - 1), i = Math.min(S.len - 1, Math.floor(X / sw));
+    const st = n.timeline[i], v = S.m[i];
+    let what = st === 'phone' ? 'on phone' : st === 'falling' ? 'falling asleep' : st === 'restless' ? 'restless' : '';
+    if (!what && v != null) what = v > Math.max(2.5 * S.med, .3) ? 'moved a lot' : v > 1.5 * S.med ? 'moving a little' : 'lying still';
+    if (!what) what = 'asleep';
+    if (n.snore5 && n.snore5[i] > 0) what += `, snoring ${n.snore5[i]} s`;
+    tip.textContent = `${clock(S.at(i))} · ${what}`;
+    tip.style.left = Math.min(Math.max(X, tip.offsetWidth / 2), W - tip.offsetWidth / 2) + 'px';
+    tip.style.top = (LT - 30) + 'px';
+    cross.style.left = X + 'px';
+    tip.classList.add('on'); cross.classList.add('on');
+  };
+  const hide = () => { tip.classList.remove('on'); cross.classList.remove('on'); };
+  const hit = el.querySelector('#hit');
+  hit.addEventListener('pointermove', show); hit.addEventListener('pointerdown', show);
+  hit.addEventListener('pointerleave', hide); hit.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') setTimeout(hide, 1500); });
+}
+
+function nightCard(n, S) {
+  const hasM = n.motion && S.m.some(v => v != null), hasA = n.audio_min > 0;
+  let quiet = '';
+  if (!hasM && !hasA) quiet = 'The phone didn\'t record movement or sound this night, so we only know when it went down and when you picked it up.';
+  else if (!hasM) quiet = 'Movement wasn\'t recorded this night.';
+  else if (!hasA) quiet = 'Sound wasn\'t recorded this night, so we can\'t say if you snored.';
+  else if (n.audio_min < n.in_bed_min * .9) quiet = `Sound was recorded for ${dur(n.audio_min)} of the night, so snoring outside that time won't show.`;
+  return `<section class="card rise" style="animation-delay:.12s" aria-labelledby="nh">
+    <h2 id="nh">Your night</h2>
+    <p class="hint">${hasM ? 'The wave is how much you moved. Flat means lying still. Touch the picture to read any moment.' : 'From the moment your phone went down until you picked it up again.'}</p>
+    <div class="ends"><div><b>${clock(S.bed)}</b>phone down</div><div><b>${clock(S.up)}</b>phone up</div></div>
+    <div class="chart" id="night"></div>
+    ${quiet ? `<p class="quiet">${quiet}</p>` : ''}
+  </section>`;
+}
+
+// ---------- plain English insights ----------
+function insights(n, S, prev) {
+  const out = [];
+  if (prev) {
+    const dBed = sinceSix(S.bed) - sinceSix(ms(prev.bed)), dSlept = n.asleep_min - prev.asleep_min;
+    const before = (ms(n.date) - ms(prev.date)) === 86400000 ? 'the night before' : `your last recorded night (${day(ms(prev.bed), { weekday: 'long' })})`;
+    let t = '';
+    if (Math.abs(dBed) >= 30) t = `You went to bed <b>${dur(Math.abs(dBed))} ${dBed < 0 ? 'earlier' : 'later'}</b> than ${before}`;
+    if (Math.abs(dSlept) >= 20) t += t ? ` and slept <b>${dur(Math.abs(dSlept))} ${dSlept > 0 ? 'more' : 'less'}</b>.` : `You slept <b>${dur(Math.abs(dSlept))} ${dSlept > 0 ? 'more' : 'less'}</b> than ${before}.`;
+    else if (t) t += '.';
+    if (!t) t = `Very much like ${before}: same bedtime, about the same sleep.`;
+    out.push([ic.clock, t]);
+  } else out.push([ic.moon, n === data.nights[data.nights.length - 1] ? 'This is the <b>first night</b> recorded. From tomorrow you\'ll see how each night compares.' : 'This was the <b>first night</b> recorded, so there\'s nothing earlier to compare it with.']);
+  if (S.calm) out.push([ic.calm, `Calmest stretch: <b>${clock(S.at(S.calm[0]))} to ${clock(S.at(S.calm[1]))}</b>. For ${dur((S.calm[1] - S.calm[0]) * 5)} you barely moved.`]);
+  if (n.audio_min > 0) {
+    if (S.snoreAt.length) {
+      const a = S.at(S.snoreAt[0]), b = S.at(S.snoreAt[S.snoreAt.length - 1] + 1), span = (b - a) / 60000;
+      out.push([ic.snore, `${span < n.in_bed_min / 2 ? 'Snoring only' : 'Snoring on and off'} between <b>${clock(a)} and ${clock(b)}</b>, about ${n.snore_min ? durWords(n.snore_min) : 'a minute'} in total.`]);
+    } else out.push([ic.snore, `<b>No snoring</b> heard in ${dur(n.audio_min)} of listening.`]);
+  }
+  if (n.phone_checks === 0) out.push([ic.phone, 'You <b>didn\'t pick up your phone</b> once until morning.']);
+  else out.push([ic.phone, `You picked up your phone <b>${n.phone_checks === 1 ? 'once' : n.phone_checks + ' times'}</b> in the night, ${dur(n.phone_min)} in all.`]);
+  if (out.length < 4 && n.motion && n.movements > 0) out.push([ic.move, `You turned over or shifted about <b>${n.movements} times</b>.`]);
+  return `<section class="card rise" style="animation-delay:.2s" aria-labelledby="ih">
+    <h2 id="ih">What stands out</h2>
+    <ul class="facts">${out.slice(0, 4).map(([i, t]) => `<li><span class="ic">${i}</span><span>${t}</span></li>`).join('')}</ul>
+  </section>`;
+}
+
+// ---------- over time ----------
+function trendCard(list) {
+  if (list.length < 3) return `<section class="card rise" style="animation-delay:.28s">
+    <h2>Your sleep over time</h2>
+    <p class="hint">After 3 nights you'll see how much you sleep each night and how regular your bedtime is. ${3 - list.length} more night${3 - list.length > 1 ? 's' : ''} to go.</p>
+  </section>`;
+  const hit = list.filter(n => n.asleep_min >= NEED).length, avg = list.reduce((a, n) => a + n.asleep_min, 0) / list.length;
+  const beds = list.map(n => sinceSix(ms(n.bed))), lo = q(beds, .25), hi = q(beds, .75), spread = hi - lo;
+  const reg = spread <= 45 ? 'That\'s a steady routine.' : spread <= 90 ? 'Fairly regular.' : 'That\'s a wide spread. A steadier bedtime usually makes sleep easier.';
+  return `<section class="card rise" style="animation-delay:.28s" aria-labelledby="th">
+    <h2 id="th">Your last ${list.length} nights</h2>
+    <p class="headline">7 hours on ${hit} of ${list.length} nights. <span class="m">Average ${dur(avg)}.</span></p>
+    <div class="chart" id="bars"></div>
+    <div class="gap"></div>
+    <h2>Bedtime</h2>
+    <p class="headline">Usually between ${clock(Date.UTC(2026, 0, 1, 18) - IST + lo * 60000)} and ${clock(Date.UTC(2026, 0, 1, 18) - IST + hi * 60000)}. <span class="m">${reg}</span></p>
+    <div class="chart" id="beds"></div>
+    <p class="quiet">Tap any night to see it.</p>
+  </section>`;
+}
+
+function xLabels(list, X, y) {
+  let g = '', lastX = -99;
+  list.forEach((n, i) => { const cx = X(i); if (cx - lastX < 56 && i !== list.length - 1) return; if (i === list.length - 1 && cx - lastX < 56) return; lastX = cx; g += `<text x="${cx}" y="${y}" text-anchor="middle">${day(ms(n.bed) - 6 * HOUR, { day: 'numeric', month: 'short' })}</text>`; });
+  return g;
+}
+
+function barsSVG(el, list, sel) {
+  const W = el.clientWidth, L = 28, T = 16, PH = 168, H = T + PH + 24, bw = (W - L) / list.length, w = Math.max(2, Math.min(20, bw - 2));
+  const max = Math.max(540, ...list.map(n => n.asleep_min)), y = m => T + PH * (1 - m / max), X = i => L + bw * i + bw / 2;
+  let g = '';
+  for (let h = 0; h * 60 <= max; h += 3) g += `<line x1="${L}" x2="${W}" y1="${y(h * 60)}" y2="${y(h * 60)}" stroke="var(${h ? '--grid' : '--base'})"/><text x="${L - 8}" y="${y(h * 60) + 4}" text-anchor="end">${h}h</text>`;
+  list.forEach((n, i) => {
+    const top = y(n.asleep_min), x0 = X(i) - w / 2, r = Math.min(4, w / 2), b = y(0);
+    const on = n === sel;
+    g += `<path d="M${x0},${b}V${top + r}Q${x0},${top} ${x0 + r},${top}H${x0 + w - r}Q${x0 + w},${top} ${x0 + w},${top + r}V${b}Z" fill="var(${n.asleep_min >= NEED ? '--blue' : '--blue-soft'})"${on ? ' stroke="var(--ink)" stroke-width="2"' : ''}/>`;
+    g += `<rect data-i="${i}" x="${X(i) - bw / 2}" y="${T}" width="${bw}" height="${PH}" fill="transparent"><title>${day(ms(n.bed) - 6 * HOUR, { weekday: 'short', day: 'numeric', month: 'short' })}: ${dur(n.asleep_min)}</title></rect>`;
+  });
+  g += `<line x1="${L}" x2="${W}" y1="${y(NEED)}" y2="${y(NEED)}" stroke="var(--ink)" stroke-width="1.5"/><text class="ink" x="${W}" y="${y(NEED) - 6}" text-anchor="end">7 h goal</text>`;
+  g += xLabels(list, X, H - 4);
+  el.innerHTML = `<svg width="${W}" height="${H}" role="img" aria-label="Hours asleep each night against the 7 hour goal">${g}</svg>`;
+}
+
+function bedsSVG(el, list, sel) {
+  const W = el.clientWidth, L = 44, T = 8, PH = 144, H = T + PH + 24, bw = (W - L) / list.length, X = i => L + bw * i + bw / 2;
+  const beds = list.map(n => sinceSix(ms(n.bed)));
+  const a = Math.floor(Math.min(...beds) / 60) * 60, b = Math.max(a + 120, Math.ceil(Math.max(...beds) / 60) * 60);
+  const y = m => T + PH * (m - a) / (b - a), lo = q(beds, .25), hi = q(beds, .75), step = b - a > 300 ? 120 : 60;
+  let g = `<rect x="${L}" y="${y(lo) - 4}" width="${W - L}" height="${y(hi) - y(lo) + 8}" rx="8" fill="var(--blue-wash)"/>`;
+  for (let m = a; m <= b; m += step) g += `<line x1="${L}" x2="${W}" y1="${y(m)}" y2="${y(m)}" stroke="var(--grid)"/><text x="${L - 8}" y="${y(m) + 4}" text-anchor="end">${sixToClock(m)}</text>`;
+  list.forEach((n, i) => {
+    const on = n === sel;
+    g += `<circle cx="${X(i)}" cy="${y(beds[i])}" r="${on ? 6 : 4}" fill="var(${on ? '--ink' : '--blue'})" stroke="var(--surface)" stroke-width="2"/>`;
+    g += `<rect data-i="${i}" x="${X(i) - bw / 2}" y="${T}" width="${bw}" height="${PH}" fill="transparent"><title>${day(ms(n.bed) - 6 * HOUR, { weekday: 'short', day: 'numeric', month: 'short' })}: bed at ${clock(ms(n.bed))}</title></rect>`;
+  });
+  g += xLabels(list, X, H - 4);
+  el.innerHTML = `<svg width="${W}" height="${H}" role="img" aria-label="Bedtime each night; the shaded band is your usual bedtime">${g}</svg>`;
+}
+
+// ---------- page ----------
+function render() {
+  const nights = data.nights, main = $('#main');
+  $('#stamp').textContent = data.updated ? `Updated ${clock(ms(data.updated))}` : '';
+  let foot = '';
+  if (data.last_upload) foot = `Phone last sent data ${istDate(ms(data.last_upload)) === istDate(Date.now()) ? 'today' : day(ms(data.last_upload), { day: 'numeric', month: 'short' })} at ${clock(ms(data.last_upload))}.`;
+  $('#foot').textContent = foot;
+  const errs = (data.errors || []).length ? `<div class="note" role="status">${ic.info}<div><p>Some recent data from the phone couldn't be read. Your nights below are still right; a night may just be missing a little detail.</p><details><summary>Details</summary>${data.errors.map(e => `<code>${e.replace(/[<>&]/g, '')}</code>`).join('')}</details></div></div>` : '';
+  if (!nights.length) {
+    main.innerHTML = `<section class="card hello rise">${ic.moon}<h2>No nights yet</h2><p class="hint">Keep the phone by your bed tonight. Tomorrow morning this page will tell you how long you slept.</p></section>${errs}`;
+    return;
+  }
+  const n = nights[idx], S = study(n), prev = nights[idx - 1];
+  const upDay = istDate(S.up), today = istDate(Date.now());
+  const title = idx === nights.length - 1 && upDay === today ? 'Last night' : `${day(S.bed - 6 * HOUR, { weekday: 'long' })} night`;
+  const dd = t => `${day(t, { weekday: 'short' })} ${day(t, { day: 'numeric' })}`, sub = `${dd(S.bed - 6 * HOUR)} to ${dd(S.up)} ${day(S.up, { month: 'short' })}`;
+  const list = nights.slice(-30);
+  main.innerHTML = `
+    <div class="when rise"><div><h1>${title}</h1><p>${sub}</p></div>
+      <div class="steps"><button class="iconbtn" id="older" aria-label="Earlier night" ${idx ? '' : 'disabled'}>${ic.prev}</button><button class="iconbtn" id="newer" aria-label="Later night" ${idx < nights.length - 1 ? '' : 'disabled'}>${ic.next}</button></div></div>
+    ${answer(n)}
+    ${nightCard(n, S)}
+    ${insights(n, S, prev)}
+    ${trendCard(list)}
+    ${errs}`;
+  const draw = () => {
+    nightSVG($('#night'), n, S);
+    if ($('#bars')) { barsSVG($('#bars'), list, n); bedsSVG($('#beds'), list, n); }
+  };
+  draw();
+  window.onresize = () => requestAnimationFrame(draw);
+  $('#older').onclick = () => go(idx - 1);
+  $('#newer').onclick = () => go(idx + 1);
+  main.querySelectorAll('#bars, #beds').forEach(c => c.onclick = e => { const i = e.target.dataset && e.target.dataset.i; if (i != null) { go(nights.length - list.length + +i); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
+}
+function go(i) { if (i >= 0 && i < data.nights.length) { idx = i; render(); } }
+document.addEventListener('keydown', e => { if (!data || e.target.closest('input,textarea')) return; if (e.key === 'ArrowLeft') go(idx - 1); if (e.key === 'ArrowRight') go(idx + 1); });
+
+function load() {
+  fetch('api/nights', { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => {
+    j.nights = (j.nights || []).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+    if (data && data.updated === j.updated) return; // nothing new, don't redraw
+    const keep = data && data.nights[idx] && data.nights[idx].date;
+    data = j;
+    const k = keep ? j.nights.findIndex(n => n.date === keep) : -1;
+    idx = k >= 0 ? k : Math.max(0, j.nights.length - 1);
+    render();
+  }).catch(() => {
+    if (data) return; // keep showing what we have
+    $('#main').innerHTML = `<section class="card hello">${ic.info}<h2>Couldn't reach your sleep data</h2><p class="hint">The server didn't answer. Check your internet and try again.</p><button class="btn" onclick="load()">Try again</button></section>`;
+  });
+}
+load();
+setInterval(() => { if (document.visibilityState === 'visible') load(); }, 5 * 60000);
+</script>
+</body>
+</html>
